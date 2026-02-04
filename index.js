@@ -63,7 +63,7 @@ app.get("/new_clinic_stories", (req, res) => {
 });
 
 
-
+// Handle form submission for creating or editing a post
 app.post("/submit_story", upload.single("image"), (req, res) => {
   const { title, subtitle, content, author, postId } = req.body; // <-- postId will be sent if editing
   const postdate = new Date().toLocaleDateString();
@@ -87,7 +87,7 @@ app.post("/submit_story", upload.single("image"), (req, res) => {
     if (req.file) {
       existingPost.image = req.file.filename;
     }
-
+    req.flash('success_msg', 'Post updated successfully');
     res.redirect(`/view_posts/${existingPost.id}`);
   } else {
     // --- CREATE NEW POST ---
@@ -107,13 +107,13 @@ app.post("/submit_story", upload.single("image"), (req, res) => {
       id: newPostId,
       name: author
     });
-
-    res.render("index", { db: db, success_msg: "New story created successfully!", content: ""});
+    req.flash('success_msg', 'New post created successfully');
+    res.render("index", { db: db, success_msg: "New post created successfully!", content: ""});
   }
 });
 
 
-
+// View a single post
 app.get("/view_posts/:id", (req, res) => {
     // view a single post based on ID
   const postId = parseInt(req.params.id); // grab the ID from URL
@@ -121,12 +121,16 @@ app.get("/view_posts/:id", (req, res) => {
   const author = db.users.find(u => u.id === postId);
 
   if (!post) {
+    req.flash('error', 'Post not found');
     return res.status(404).send("Post not found");
   }
 
-  res.render("view_post", { post: post, author: author, editCommentId: req.query.edit });
+  const success_msg = req.params.success_msg || req.flash('success_msg');
+  res.render("view_post", { post: post, author: author, editCommentId: req.query.edit, success_msg: success_msg });
 });
 
+
+// Route to display the add new user form
 app.get("/add_new_user", (req, res) => {
     res.render("add_new_user");
 });
@@ -145,7 +149,7 @@ app.post("/add_new_user", upload.single("profilepic"), (req, res) => {
         req.flash('success', 'Your profile was created successfully!');
     }
     
-	res.render("index", { db: db  });
+	res.render("index", { db: db, success_msg: "Your profile was created successfully!", content: ""});
 });
 
 
@@ -166,6 +170,7 @@ app.post("/posts/:id/comments", (req, res) => {
   });
   const num = post.id;
   // Redirect back to the post page
+  req.flash('success_msg', 'Comment created successfully');
   res.redirect('/view_posts/' + num);
 
 });
@@ -194,7 +199,7 @@ app.post("/posts/:postId/comments/:commentId/edit", (req, res) => {
 
   comment.comment = req.body.comment;
   comment.date = new Date().toLocaleString();
-
+  req.flash('success_msg', 'Comment updated successfully');
   res.redirect("/view_posts/" + postId);
 });
 
@@ -211,11 +216,12 @@ app.post("/delete_post/:id", (req, res) => {
     // Remove the post
     db.posts.splice(postIndex, 1);
 
-    // Optionally remove the author as well
+    // remove the author as well
     const userIndex = db.users.findIndex(u => u.id === postId);
     if (userIndex !== -1) db.users.splice(userIndex, 1);
 
-    res.redirect("/"); // Go back to homepage or posts list
+    req.flash('success_msg', 'Post deleted successfully');
+    res.redirect("/"); // Go back to homepage
 });
 
 // Delete Comment
@@ -227,10 +233,9 @@ app.post("/posts/:postId/comments/:commentId/delete", (req, res) => {
   if (!post) return res.status(404).send("Post not found");
 
   post.comments = post.comments.filter(c => c.id !== commentId);
+  req.flash('success_msg', 'Comment deleted successfully');
   res.redirect("/view_posts/" + postId);
 });
-
-
 
 
 app.listen(port, () => {

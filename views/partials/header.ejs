@@ -44,35 +44,40 @@
     </nav>
   </header>
 
-  <!-- Flash Notifications -->
-  <div id="flash-container" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1050; width: auto; max-width: 90%;">
-    <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <%= success_msg[0] %>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+<!-- Flash Notifications -->
+
+ <div
+  id="flash-container"
+  class="container"
+  style="position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 9999;"
+>
+  <% if (success_msg && success_msg.length > 0) { %>
+      <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+        <%= success_msg %>
+        <button type="button" class="close" data-dismiss="alert">
+          <span>&times;</span>
         </button>
       </div>
     <% } %>
 
-    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <%= error_msg[0] %>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+    <% if (error_msg && error_msg.length > 0) { %>
+      <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        <%= error_msg %>
+        <button type="button" class="close" data-dismiss="alert">
+          <span>&times;</span>
         </button>
       </div>
     <% } %>
   </div>
 
 
+
   <script>
-  setTimeout(() => {
-    document.querySelectorAll('#flash-container .alert').forEach(alert => {
-      alert.classList.remove('show'); // triggers fade-out
-      alert.classList.add('hide');    // hides completely
-    });
-  }, 5000); // hide after 5 seconds
-</script>
+    setTimeout(() => {
+      document.querySelectorAll('#flash-container .alert').forEach(alert => {
+        alert.classList.remove('show');
+      });
+    }, 4000);
+  </script>
 
 <!--main class="container"><!-- Main content starts here -->   
